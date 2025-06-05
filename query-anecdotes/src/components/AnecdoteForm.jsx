@@ -11,8 +11,13 @@ const AnecdoteForm = () => {
 
   const newAnecdoteMutation = useMutation({
     mutationFn: addAnecdote,
-    onSuccess: () => {
+    onSuccess: (newAnecdote) => {
       queryClient.invalidateQueries({queryKey: ['anecdotes']})
+      notificationDispatch({type: 'NOTIFY', payload: `Added ${newAnecdote.content}`})
+    },
+    onError:(error) => {
+      const errorMessage = error.response?.data?.error || 'Failed to add anecdote'
+      notificationDispatch({type: 'NOTIFY', payload: errorMessage})
     }
   })
 
@@ -21,7 +26,6 @@ const AnecdoteForm = () => {
     const content = event.target.anecdote.value
     event.target.anecdote.value = ''
     newAnecdoteMutation.mutate({content, votes: 0})
-    notificationDispatch({type: 'NOTIFY', payload: `Added ${content}`})
   }
 
   return (
